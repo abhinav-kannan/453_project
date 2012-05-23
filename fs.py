@@ -41,6 +41,7 @@
 import optparse
 import os
 import sys
+import re
 
 import m5
 from m5.defines import buildEnv
@@ -94,6 +95,14 @@ parser.add_option("--etherdump", action="store", type="string", dest="etherdump"
                   help="Specify the filename to dump a pcap capture of the" \
                   "ethernet traffic")
 
+# New options for 453 project 
+parser.add_option("--asymmetric", action="store_true",
+		  help="Specifies asymmetric mode. Default symmetric")
+parser.add_option("--num-bce", type="int", default=16,
+		  help="Specify the number of Base Core Equivalents (BCE)")
+parser.add_option("--num-r", type="int", default=1,
+		  help="Specify the number of BCEs per core")
+
 execfile(os.path.join(config_root, "common", "Options.py"))
 
 (options, args) = parser.parse_args()
@@ -104,6 +113,7 @@ if args:
 
 # driver system CPU is always simple... note this is an assignment of
 # a class, not an instance.
+
 DriveCPUClass = AtomicSimpleCPU
 drive_mem_mode = 'atomic'
 
@@ -126,7 +136,14 @@ else:
     else:
         bm = [SysConfig()]
 
+# options.num_cpus will not be used. We would need to compute it
+# according the num_bce and num_rsc
 np = options.num_cpus
+
+# Number of BCE in total
+num_bce = options.num_bce
+# Number of resources/BCE per core
+num_rsc = options.num_r
 
 if buildEnv['TARGET_ISA'] == "alpha":
     test_sys = makeLinuxAlphaSystem(test_mem_mode, bm[0])
@@ -151,9 +168,75 @@ if options.kernel is not None:
 if options.script is not None:
     test_sys.readfile = options.script
 
-test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(np)]
+# Project code
+if options.asymmetric:
+	test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(1+num_bce-num_rsc)]
 
-CacheConfig.config_cache(options, test_sys)
+ 	# In an asymmetric system, we can have one big-core
+	# and several small cores depending on the num_bce
+	# We have simulated one 'num_r' BCE big core and remaining
+	# one BCE cores. Accordingly we must change the below
+	# parameters for the architecture to be constructed properly
+	# CPU 0 is the big core
+	print "Asymmetric mode"
+
+	# TODO: I could not find a way to create an asymmetric system with 
+	# the configuration we want. I think we need a system with one big
+	# superscalar core with width 'num_bce' and all the other cores to 
+	# be baseline. As of now, I am not sure if there is a way to do it.
+	# The workaround is to make all the cores as O3CPU and change the 
+	# widths of all other cores to 1. We still do not know the config 
+	# of the base core so I am assuming the base core is like a 
+	# uniprocessor.
+	TestCPUClass.issueWidth = 1	# Default: 8
+	TestCPUClass.fetchWidth = 1	# Default: 8
+	TestCPUClass.decodeWidth = 1	# Default: 8
+	TestCPUClass.dispatchWidth = 1	# Default: 8
+	TestCPUClass.renameWidth = 1	# Default: 8
+	TestCPUClass.issueWidth = 1	# Default: 8
+	TestCPUClass.commitWidth = 1	# Default: 8
+	TestCPUClass.wbWidth = 1	# Default: 8
+	TestCPUClass.RASSize = 2	# Default: 16
+	TestCPUClass.LQEntries = 4	# Default: 32
+	TestCPUClass.SQEntries = 4	# Default: 32
+	TestCPUClass.numIQEntries = 8	# Default: 64
+	TestCPUClass.numROBEntries = 24	# Default: 192
+
+	test_sys.cpu[0].issueWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].fetchWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].decodeWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].dispatchWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].renameWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].issueWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].commitWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].wbWidth = num_rsc	# Default: 8
+	test_sys.cpu[0].RASSize = num_rsc * 2	# Default: 16
+	test_sys.cpu[0].LQEntries = num_rsc * 4	# Default: 32
+	test_sys.cpu[0].SQEntries = num_rsc * 4	# Default: 32
+	test_sys.cpu[0].numIQEntries = num_rsc * 8 # Default: 64
+	test_sys.cpu[0].numROBEntries = num_rsc * 24 # Default: 192
+else:
+	test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(int(num_bce/num_rsc))]
+	
+    	# In an symmetric system, we need to have all the cores
+	# with the same configuration
+    	print "Symmetric mode"
+	rsc = num_bce / num_rsc
+	TestCPUClass.issueWidth = rsc		# Default: 8
+	TestCPUClass.fetchWidth = rsc		# Default: 8
+	TestCPUClass.decodeWidth = rsc		# Default: 8
+	TestCPUClass.dispatchWidth = rsc	# Default: 8
+	TestCPUClass.renameWidth = rsc		# Default: 8
+	TestCPUClass.issueWidth = rsc		# Default: 8
+	TestCPUClass.commitWidth = rsc		# Default: 8
+	TestCPUClass.wbWidth = rsc		# Default: 8
+	TestCPUClass.RASSize = rsc * 2		# Default: 16
+	TestCPUClass.LQEntries = rsc * 4	# Default: 32
+	TestCPUClass.SQEntries = rsc * 4	# Default: 32
+	TestCPUClass.numIQEntries = rsc * 8  	# Default: 64
+	TestCPUClass.numROBEntries = rsc * 24 	# Default: 192    
+
+CacheConfig.new_config_cache(options, test_sys, num_bce, num_rsc)
 
 if options.caches or options.l2cache:
     if bm[0]:
@@ -173,7 +256,8 @@ if options.caches or options.l2cache:
     test_sys.iocache.cpu_side = test_sys.iobus.port
     test_sys.iocache.mem_side = test_sys.membus.port
 
-for i in xrange(np):
+#for i in xrange(np):
+for i in xrange(num_bce):
     if options.fastmem:
         test_sys.cpu[i].physmem_port = test_sys.physmem.port
 
@@ -188,7 +272,7 @@ if len(bm) == 2:
     elif buildEnv['TARGET_ISA'] == 'sparc':
         drive_sys = makeSparcSystem(drive_mem_mode, bm[1])
     elif buildEnv['TARGET_ISA'] == 'x86':
-        drive_sys = makeX86System(drive_mem_mode, np, bm[1])
+	drive_sys = makeX86System(drive_mem_mode, num_bce, bm[1])
     elif buildEnv['TARGET_ISA'] == 'arm':
         drive_sys = makeArmSystem(drive_mem_mode,
                 machine_options.machine_type, bm[1])
