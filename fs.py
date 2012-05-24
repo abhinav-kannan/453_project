@@ -170,7 +170,10 @@ if options.script is not None:
 
 # Project code
 if options.asymmetric:
-    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(1+num_bce-num_rsc)]
+    # Set the number of processors variable
+    # For aysmmetric
+    np = 1+num_bce-num_rsc
+    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(np)]
 
     # In an asymmetric system, we can have one big-core
     # and several small cores depending on the num_bce
@@ -216,7 +219,9 @@ if options.asymmetric:
     test_sys.cpu[0].numIQEntries = num_rsc * 8 # Default: 64
     test_sys.cpu[0].numROBEntries = num_rsc * 24 # Default: 192
 else:
-    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(int(num_bce/num_rsc))]
+    # Set number of processors for symmetric cores
+    np = int(num_bce/num_rsc)
+    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(np)]
 
     # In an symmetric system, we need to have all the cores
     # with the same configuration
@@ -256,8 +261,8 @@ if options.caches or options.l2cache:
     test_sys.iocache.cpu_side = test_sys.iobus.port
     test_sys.iocache.mem_side = test_sys.membus.port
 
-#for i in xrange(np):
-for i in xrange(num_bce):
+# np is the number of processors which has been set based on the mode
+for i in xrange(np):
     if options.fastmem:
         test_sys.cpu[i].physmem_port = test_sys.physmem.port
 
