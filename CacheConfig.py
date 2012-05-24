@@ -77,12 +77,12 @@ def new_config_cache(options, system, num_bce=4, num_r=1):
         if options.asymmetric:
             new_l2_size = str(int(old_l2_size[0]) * num_r) + "MB"
         else:
-            new_l2_size = str(int(old_l2_size[0]) * (num_bce/num_r)) + "MB"
+            new_l2_size = str(int(old_l2_size[0]) * int(num_bce/num_r)) + "MB"
         
         if options.asymmetric:
             new_l2_assoc = num_r
         else:
-            new_l2_assoc = (num_bce / num_r)
+            new_l2_assoc = int(num_bce / num_r)
         
         system.l2 = L2Cache(size = new_l2_size, assoc = new_l2_assoc,
                                 block_size=options.cacheline_size)
@@ -109,10 +109,10 @@ def new_config_cache(options, system, num_bce=4, num_r=1):
                     new_l1i_assoc = num_r
                     new_l1d_assoc = num_r
             else:       
-                new_l1i_size = str(int(old_l1i_size[0]) * (num_bce / num_r)) + "kB"
-                new_l1d_size = str(int(old_l1d_size[0]) * (num_bce / num_r)) + "kB"
-                new_l1i_assoc = (num_bce / num_r)
-                new_l1d_assoc = (num_bce / num_r)
+                new_l1i_size = str(int(old_l1i_size[0]) * int(num_bce / num_r)) + "kB"
+                new_l1d_size = str(int(old_l1d_size[0]) * int(num_bce / num_r)) + "kB"
+                new_l1i_assoc = int(num_bce / num_r)
+                new_l1d_assoc = int(num_bce / num_r)
 
             print "CPU " + str(i) + " -> L1i Size: " + str(new_l1i_size) + " L1d Size: " + str(new_l1d_size)
             icache = L1Cache(size = new_l1i_size, assoc = new_l1i_assoc,
