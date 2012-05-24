@@ -97,11 +97,11 @@ parser.add_option("--etherdump", action="store", type="string", dest="etherdump"
 
 # New options for 453 project 
 parser.add_option("--asymmetric", action="store_true",
-		  help="Specifies asymmetric mode. Default symmetric")
+                    help="Specifies asymmetric mode. Default symmetric")
 parser.add_option("--num-bce", type="int", default=16,
-		  help="Specify the number of Base Core Equivalents (BCE)")
+                    help="Specify the number of Base Core Equivalents (BCE)")
 parser.add_option("--num-r", type="int", default=1,
-		  help="Specify the number of BCEs per core")
+                    help="Specify the number of BCEs per core")
 
 execfile(os.path.join(config_root, "common", "Options.py"))
 
@@ -170,71 +170,71 @@ if options.script is not None:
 
 # Project code
 if options.asymmetric:
-	test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(1+num_bce-num_rsc)]
+    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(1+num_bce-num_rsc)]
 
- 	# In an asymmetric system, we can have one big-core
-	# and several small cores depending on the num_bce
-	# We have simulated one 'num_r' BCE big core and remaining
-	# one BCE cores. Accordingly we must change the below
-	# parameters for the architecture to be constructed properly
-	# CPU 0 is the big core
-	print "Asymmetric mode"
+    # In an asymmetric system, we can have one big-core
+    # and several small cores depending on the num_bce
+    # We have simulated one 'num_r' BCE big core and remaining
+    # one BCE cores. Accordingly we must change the below
+    # parameters for the architecture to be constructed properly
+    # CPU 0 is the big core
+    print "Asymmetric mode"
 
-	# TODO: I could not find a way to create an asymmetric system with 
-	# the configuration we want. I think we need a system with one big
-	# superscalar core with width 'num_bce' and all the other cores to 
-	# be baseline. As of now, I am not sure if there is a way to do it.
-	# The workaround is to make all the cores as O3CPU and change the 
-	# widths of all other cores to 1. We still do not know the config 
-	# of the base core so I am assuming the base core is like a 
-	# uniprocessor.
-	TestCPUClass.issueWidth = 1	# Default: 8
-	TestCPUClass.fetchWidth = 1	# Default: 8
-	TestCPUClass.decodeWidth = 1	# Default: 8
-	TestCPUClass.dispatchWidth = 1	# Default: 8
-	TestCPUClass.renameWidth = 1	# Default: 8
-	TestCPUClass.issueWidth = 1	# Default: 8
-	TestCPUClass.commitWidth = 1	# Default: 8
-	TestCPUClass.wbWidth = 1	# Default: 8
-	TestCPUClass.RASSize = 2	# Default: 16
-	TestCPUClass.LQEntries = 4	# Default: 32
-	TestCPUClass.SQEntries = 4	# Default: 32
-	TestCPUClass.numIQEntries = 8	# Default: 64
-	TestCPUClass.numROBEntries = 24	# Default: 192
+    # TODO: I could not find a way to create an asymmetric system with 
+    # the configuration we want. I think we need a system with one big
+    # superscalar core with width 'num_bce' and all the other cores to 
+    # be baseline. As of now, I am not sure if there is a way to do it.
+    # The workaround is to make all the cores as O3CPU and change the 
+    # widths of all other cores to 1. We still do not know the config 
+    # of the base core so I am assuming the base core is like a 
+    # uniprocessor.
+    TestCPUClass.issueWidth = 1     # Default: 8
+    TestCPUClass.fetchWidth = 1     # Default: 8
+    TestCPUClass.decodeWidth = 1    # Default: 8
+    TestCPUClass.dispatchWidth = 1  # Default: 8
+    TestCPUClass.renameWidth = 1    # Default: 8
+    TestCPUClass.issueWidth = 1     # Default: 8
+    TestCPUClass.commitWidth = 1    # Default: 8
+    TestCPUClass.wbWidth = 1        # Default: 8
+    TestCPUClass.RASSize = 2        # Default: 16
+    TestCPUClass.LQEntries = 4      # Default: 32
+    TestCPUClass.SQEntries = 4      # Default: 32
+    TestCPUClass.numIQEntries = 8   # Default: 64
+    TestCPUClass.numROBEntries = 24 # Default: 192
 
-	test_sys.cpu[0].issueWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].fetchWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].decodeWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].dispatchWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].renameWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].issueWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].commitWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].wbWidth = num_rsc	# Default: 8
-	test_sys.cpu[0].RASSize = num_rsc * 2	# Default: 16
-	test_sys.cpu[0].LQEntries = num_rsc * 4	# Default: 32
-	test_sys.cpu[0].SQEntries = num_rsc * 4	# Default: 32
-	test_sys.cpu[0].numIQEntries = num_rsc * 8 # Default: 64
-	test_sys.cpu[0].numROBEntries = num_rsc * 24 # Default: 192
+    test_sys.cpu[0].issueWidth = num_rsc    # Default: 8
+    test_sys.cpu[0].fetchWidth = num_rsc    # Default: 8
+    test_sys.cpu[0].decodeWidth = num_rsc   # Default: 8
+    test_sys.cpu[0].dispatchWidth = num_rsc # Default: 8
+    test_sys.cpu[0].renameWidth = num_rsc   # Default: 8
+    test_sys.cpu[0].issueWidth = num_rsc    # Default: 8
+    test_sys.cpu[0].commitWidth = num_rsc   # Default: 8
+    test_sys.cpu[0].wbWidth = num_rsc       # Default: 8
+    test_sys.cpu[0].RASSize = num_rsc * 2   # Default: 16
+    test_sys.cpu[0].LQEntries = num_rsc * 4 # Default: 32
+    test_sys.cpu[0].SQEntries = num_rsc * 4 # Default: 32
+    test_sys.cpu[0].numIQEntries = num_rsc * 8 # Default: 64
+    test_sys.cpu[0].numROBEntries = num_rsc * 24 # Default: 192
 else:
-	test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(int(num_bce/num_rsc))]
-	
-    	# In an symmetric system, we need to have all the cores
-	# with the same configuration
-    	print "Symmetric mode"
-	rsc = num_bce / num_rsc
-	TestCPUClass.issueWidth = rsc		# Default: 8
-	TestCPUClass.fetchWidth = rsc		# Default: 8
-	TestCPUClass.decodeWidth = rsc		# Default: 8
-	TestCPUClass.dispatchWidth = rsc	# Default: 8
-	TestCPUClass.renameWidth = rsc		# Default: 8
-	TestCPUClass.issueWidth = rsc		# Default: 8
-	TestCPUClass.commitWidth = rsc		# Default: 8
-	TestCPUClass.wbWidth = rsc		# Default: 8
-	TestCPUClass.RASSize = rsc * 2		# Default: 16
-	TestCPUClass.LQEntries = rsc * 4	# Default: 32
-	TestCPUClass.SQEntries = rsc * 4	# Default: 32
-	TestCPUClass.numIQEntries = rsc * 8  	# Default: 64
-	TestCPUClass.numROBEntries = rsc * 24 	# Default: 192    
+    test_sys.cpu = [TestCPUClass(cpu_id=i) for i in xrange(int(num_bce/num_rsc))]
+
+    # In an symmetric system, we need to have all the cores
+    # with the same configuration
+    print "Symmetric mode"
+    rsc = num_bce / num_rsc
+    TestCPUClass.issueWidth = rsc       # Default: 8
+    TestCPUClass.fetchWidth = rsc       # Default: 8
+    TestCPUClass.decodeWidth = rsc      # Default: 8
+    TestCPUClass.dispatchWidth = rsc    # Default: 8
+    TestCPUClass.renameWidth = rsc      # Default: 8
+    TestCPUClass.issueWidth = rsc       # Default: 8
+    TestCPUClass.commitWidth = rsc      # Default: 8
+    TestCPUClass.wbWidth = rsc          # Default: 8
+    TestCPUClass.RASSize = rsc * 2      # Default: 16
+    TestCPUClass.LQEntries = rsc * 4    # Default: 32
+    TestCPUClass.SQEntries = rsc * 4    # Default: 32
+    TestCPUClass.numIQEntries = rsc * 8     # Default: 64
+    TestCPUClass.numROBEntries = rsc * 24   # Default: 192    
 
 CacheConfig.new_config_cache(options, test_sys, num_bce, num_rsc)
 

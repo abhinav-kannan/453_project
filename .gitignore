@@ -1,2 +1,8 @@
 
-.DS_Store
+*.DS_Store
+
+*.sh
+
+*m5out*
+
+*.rcS
