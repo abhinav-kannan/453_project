@@ -71,26 +71,12 @@ def new_config_cache(options, system, num_bce=4, num_r=1):
         np = int(num_bce / num_r)
 
     if options.l2cache:
-        # Change the size of the l2 cache
-        old_l2_size = re.findall(r'[0-9]+', options.l2_size)
-
-        if options.asymmetric:
-            new_l2_size = str(int(old_l2_size[0]) * num_r) + "MB"
-        else:
-            new_l2_size = str(int(old_l2_size[0]) * int(num_bce/num_r)) + "MB"
-        
-        if options.asymmetric:
-            new_l2_assoc = num_r
-        else:
-            new_l2_assoc = int(num_bce / num_r)
-        
-        system.l2 = L2Cache(size = new_l2_size, assoc = new_l2_assoc,
-                                block_size=options.cacheline_size)
-
+        system.l2 = L2Cache(size = options.l2_size, assoc = options.l2_assoc,
+                            block_size=options.cacheline_size)
         system.tol2bus = Bus()
         system.l2.cpu_side = system.tol2bus.port
         system.l2.mem_side = system.membus.port
-        system.l2.num_cpus = np
+        system.l2.num_cpus = options.num_cpus
 
     for i in xrange(np):
         if options.caches:
