@@ -76,7 +76,7 @@ def new_config_cache(options, system, num_bce=4, num_r=1):
         system.tol2bus = Bus()
         system.l2.cpu_side = system.tol2bus.port
         system.l2.mem_side = system.membus.port
-        system.l2.num_cpus = options.num_cpus
+        system.l2.num_cpus = np
 
     for i in xrange(np):
         if options.caches:
