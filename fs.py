@@ -226,7 +226,7 @@ else:
     # In an symmetric system, we need to have all the cores
     # with the same configuration
     print "Symmetric mode"
-    rsc = num_bce / num_rsc
+    rsc = num_rsc
     TestCPUClass.issueWidth = rsc       # Default: 8
     TestCPUClass.fetchWidth = rsc       # Default: 8
     TestCPUClass.decodeWidth = rsc      # Default: 8
